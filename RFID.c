@@ -25,13 +25,15 @@ int main()
 	DCB	sPStatus;	//	씨리얼 포트 상태 저장. 속도 및 기타.
 	COMMTIMEOUTS cType;
 
-    unsigned char msg[128] = {0x0e, 0x00, 0xb0,
+    unsigned char msg[128] = {0x16, /* Amount of byte */
+							  0x00, 0xb0,
                               0x24, /* 4 */
-                              0x00, /* MODE */
-                              0x02, /* DB-ADR */
+                              0x01, /* MODE */
+                              0xe0, 0x04, 0x01, 0x00, 0x2e, 0xb3, 0x99, 0x58, /*UID*/
+                              0x0a, /* DB-ADR */
                               0x01, /* DB-N */
                               0x04, /* DB-SIZE */
-                              0x01, 0x01, 0x01, 0x01, /* DB */
+                              0x12, 0x34, 0x56, 0x78, /* DB */
                               0xff, 0xff,};
 	int iCnt;
 	hComm = CreateFile("COM1", 
@@ -113,8 +115,8 @@ int main()
 	ReadFile(hComm, msg + 1, msg[0] - 1, &dwRead, 0);
 	
 	printf("Status :: ");
-	printf("[%02X]\n ", msg[3]);
-	
+	printf("[%02X], %s\n ",msg[3], msg[3] ? "Error" : "Succeed");
+
 	CloseHandle(hComm);		
 	printf("The port is closed.\n");	
 
