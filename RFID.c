@@ -25,9 +25,14 @@ int main()
 	DCB	sPStatus;	//	씨리얼 포트 상태 저장. 속도 및 기타.
 	COMMTIMEOUTS cType;
 
-        unsigned char msg[128] = {0x07, 0x00, 0xb0,
-                               0x01, 0x00,                               
-                               0xff, 0xff,};
+    unsigned char msg[128] = {0x0e, 0x00, 0xb0,
+                              0x24, /* 4 */
+                              0x00, /* MODE */
+                              0x02, /* DB-ADR */
+                              0x01, /* DB-N */
+                              0x04, /* DB-SIZE */
+                              0x01, 0x01, 0x01, 0x01, /* DB */
+                              0xff, 0xff,};
 	int iCnt;
 	hComm = CreateFile("COM1", 
                            GENERIC_READ | GENERIC_WRITE, 
@@ -107,60 +112,9 @@ int main()
 	ReadFile(hComm, msg, 1, &dwRead, 0);	/*시리얼 포트, 어디에 읽어들일지, 읽어들이는곳의 크기,*/ 
 	ReadFile(hComm, msg + 1, msg[0] - 1, &dwRead, 0);
 	
-	printf("TAG data :: ");
-	switch(msg[0])
-	{
-		case 17:
-			printf("Standard\n");
-			break;
-		
-		case 16:
-		case 20:
-			printf("EPL\n");
-			break;
-		
-		case 27:
-			printf("UID\n");
-			break;
-		
-		default:
-			printf("Identifiction Error\n");
-		
-	}
+	printf("Status :: ");
+	printf("[%02X]\n ", msg[3]);
 	
-	printf("RF  Type :: [%s]\n", (msg[5] & 0xc0) ? "UHF Transponder" : "13.56 MHz Transponder");
-	
-	printf("Vendor   :: ");
-	switch(msg[5] & 0x0f)
-	{
-		case Philips_I_Code_1 :	
-			break;		
-			 
-		case Texas_Instruments_Tag_it_HF :
-			printf("Texas Instruments Tag it HF\n");
-			break;
-			
-		case ISO15693_Tags :				
-			printf("ISO15693 Tags\n");
-			break;
-			
-		case Philips_I_Code_EPC :
-			break;
-			
-		case Philips_I_Code_UID :			
-			break;
-	}
-	
-	printf("Recieved byte(s) :: %d\n", msg[0]);
-	printf("Status           :: %02X\n", msg[3]);
-
-	printf("UID		:: ");
-	for(iCnt = 0; iCnt <= 8; ++iCnt)
-	{
-		printf("%02X ", msg[7 + iCnt]); 
-	}
-	putchar('\n');
-		
 	CloseHandle(hComm);		
 	printf("The port is closed.\n");	
 
